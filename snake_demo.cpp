@@ -26,6 +26,13 @@ struct snake_model : sg::model
         right,
     };
 
+    enum class game_state
+    {
+        waiting,
+        running,
+        dead,
+    };
+
     snake_model(sg::context& ctx)
         : sg::model(ctx)
     {
@@ -35,13 +42,12 @@ struct snake_model : sg::model
     void reset_snake()
     {
         need_redraw = true;
-        started = false;
+        gstate = game_state::waiting;
         time_till_next_turn = 0;
         snake.clear();
         snake.push_back({0, 0});
         snake.push_back({1, 0});
         snake.push_back({2, 0});
-        snake_is_dead = false;
         queued_actions.clear();
         queued_actions.push_back(direction::right);
         apple = find_empty_place();
@@ -49,7 +55,7 @@ struct snake_model : sg::model
 
     void draw(draw_params const& p)
     {
-        if (started && !snake_is_dead)
+        if (gstate == game_state::running)
         {
             time_till_next_turn -= p.frame_time;
 
@@ -88,7 +94,7 @@ struct snake_model : sg::model
                 if (next.x < 0 || next.y < 0
                  || next.x >= field_size_x || next.y >= field_size_y
                  || snake_contains(next))
-                    snake_is_dead = true;
+                    gstate = game_state::dead;
                 else
                 {
                     snake.push_back(next);
@@ -141,22 +147,18 @@ struct snake_model : sg::model
             break;
         case SDLK_UP:
         case SDLK_w:
-            started = true;
             enqueue_action(direction::up);
             break;
         case SDLK_LEFT:
         case SDLK_a:
-            started = true;
             enqueue_action(direction::left);
             break;
         case SDLK_DOWN:
         case SDLK_s:
-            started = true;
             enqueue_action(direction::down);
             break;
         case SDLK_RIGHT:
         case SDLK_d:
-            started = true;
             enqueue_action(direction::right);
             break;
         default:
@@ -171,6 +173,9 @@ struct snake_model : sg::model
 
     void enqueue_action(direction dir)
     {
+        if (gstate == game_state::waiting)
+            gstate = game_state::running;
+
         direction last;
         if (queued_actions.size() < action_queue_max_size)
             last = queued_actions.back();
@@ -207,7 +212,7 @@ struct snake_model : sg::model
         double ar;
         double ag;
         double ab;
-        if (snake_is_dead)
+        if (gstate == game_state::dead)
         {
             r = g = b = 132./255.;
             lrgb = 32./255.;
@@ -237,19 +242,25 @@ struct snake_model : sg::model
               CAIRO_FONT_SLANT_NORMAL,
               CAIRO_FONT_WEIGHT_BOLD);
 
-        if (!started)
+        switch (gstate)
         {
+        case game_state::waiting:
             cairo_set_source_rgb(cr, 0., 0., 0.);
             cairo_set_font_size(cr, 0.05);
             draw_text(cr, "Press any key to start", aspect * 0.5, 0.56);
-        }
-        else if (snake_is_dead)
-        {
+            break;
+        case game_state::running:
+            break;
+        case game_state::dead:
             cairo_set_source_rgb(cr, 0., 0., 0.);
             cairo_set_font_size(cr, 0.1);
             draw_text(cr, "Died!", aspect * 0.5, 0.5);
             cairo_set_font_size(cr, 0.05);
             draw_text(cr, "Press SPACE to restart", aspect * 0.5, 0.56);
+            break;
+        default:
+            assert(false);
+            break;
         }
 
         cairo_surface_flush(p.surface);
@@ -293,10 +304,9 @@ struct snake_model : sg::model
 
 private:
     bool need_redraw;
-    bool started;
+    game_state gstate;
     int32_t time_till_next_turn;
     std::deque<point> snake;
-    bool snake_is_dead;
     std::deque<direction> queued_actions;
     point apple;
 };
