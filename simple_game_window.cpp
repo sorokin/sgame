@@ -193,11 +193,15 @@ namespace
 
     struct cairo_surface
     {
-        cairo_surface(cairo_device_t* device,
+        cairo_surface(sdl_window& win,
+                      sdl_glcontext& context,
+                      cairo_device_t* device,
                       cairo_content_t content,
                       unsigned int tex,
                       int width, int height)
-            : handle(nullptr)
+            : win(win)
+            , context(context)
+            , handle(nullptr)
         {
             create(device, content, tex, width, height);
         }
@@ -212,6 +216,7 @@ namespace
         {
             assert(handle == nullptr);
 
+            make_current(win, context);
             handle = cairo_gl_surface_create_for_texture(
                 device,
                 content,
@@ -231,6 +236,7 @@ namespace
         {
             if (handle)
             {
+                make_current(win, context);
                 cairo_surface_destroy(handle);
                 handle = nullptr;
             }
@@ -252,6 +258,8 @@ namespace
         }
 
     private:
+        sdl_window& win;
+        sdl_glcontext& context;
         cairo_surface_t* handle;
     };
 
@@ -263,7 +271,6 @@ namespace
                         cairo_surface& surface,
                         cairo_device const& device)
     {
-        make_current(sdl_win, cairo_context);
         surface.destroy();
 
         make_current(sdl_win, context);
@@ -281,7 +288,6 @@ namespace
 
         try
         {
-            make_current(sdl_win, cairo_context);
             surface.create(device.get(),
                            CAIRO_CONTENT_COLOR_ALPHA,
                            texture,
@@ -405,15 +411,14 @@ void sg::run(win_params const& p)
 
     SDL_SysWMinfo wm_info = sdl_win.get_wm_info();
 
+    cairo_device device(wm_info.info.x11.display,
+                        reinterpret_cast<GLXContext>(cairo_context.get()));
+
     make_current(sdl_win, context);
     glEnable(GL_TEXTURE_2D);
     glViewport(0.0, 0.0, p.width_, p.height_);
     glClearColor(0., 0., 0., 1.0);
 
-    cairo_device device(wm_info.info.x11.display,
-                        reinterpret_cast<GLXContext>(cairo_context.get()));
-
-    make_current(sdl_win, context);
     GLuint texture;
 
     glGenTextures(1, &texture);
@@ -430,8 +435,8 @@ void sg::run(win_params const& p)
         nullptr
     );
 
-    make_current(sdl_win, cairo_context);
-    cairo_surface surface(device.get(),
+    cairo_surface surface(sdl_win, cairo_context,
+                          device.get(),
                           CAIRO_CONTENT_COLOR_ALPHA,
                           texture,
                           p.width_,
@@ -443,6 +448,7 @@ void sg::run(win_params const& p)
     SDL_Event event;
 
     sg::context ctx(&sdl_win, p.width_, p.height_);
+    make_current(sdl_win, cairo_context);
     std::unique_ptr<sg::model> model = p.model_creation_func_(ctx);
     while (!ctx.should_quit)
     {
