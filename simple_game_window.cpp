@@ -410,7 +410,6 @@ void sg::run(win_params const& p)
     glViewport(0.0, 0.0, p.width_, p.height_);
     glClearColor(0., 0., 0., 1.0);
 
-    make_current(sdl_win, cairo_context);
     cairo_device device(wm_info.info.x11.display,
                         reinterpret_cast<GLXContext>(cairo_context.get()));
 
