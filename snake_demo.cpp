@@ -164,7 +164,7 @@ struct snake_model : sg::model
         }
     }
 
-    void resized(resized_params const&)
+    void resize(resize_params const&)
     {
         need_redraw = true;
     }

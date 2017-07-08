@@ -347,7 +347,7 @@ void model::key_down(key_down_params const& p)
 void model::key_up(key_up_params const&)
 {}
 
-void model::resized(resized_params const&)
+void model::resize(resize_params const&)
 {}
 
 win_params::win_params()
@@ -573,7 +573,7 @@ void sg::run(win_params const& p)
                             break;
                         }
 
-                        model->resized(sg::model::resized_params());
+                        model->resize(sg::model::resize_params());
                     }
                     break;
                 }

@@ -58,13 +58,13 @@ namespace sg
             Uint16 mod;
         };
 
-        struct resized_params
+        struct resize_params
         {};
 
         virtual void draw(draw_params const&);
         virtual void key_down(key_down_params const&);
         virtual void key_up(key_up_params const&);
-        virtual void resized(resized_params const&);
+        virtual void resize(resize_params const&);
 
     private:
         sg::context* ctx_;
