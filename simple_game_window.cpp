@@ -471,7 +471,7 @@ void sg::run(win_params const& p)
         gluOrtho2D(0.0, 1.0, 0.0, 1.0);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
