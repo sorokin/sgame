@@ -5,9 +5,9 @@ struct house_model : sg::model
 {
     house_model(sg::context& ctx)
         : sg::model(ctx)
-    {
-        s = 1.0;
-    }
+        , s(1.0)
+        , right_pressed(false)
+    {}
 
     void draw(draw_params const& p)
     {
@@ -78,22 +78,41 @@ struct house_model : sg::model
         cairo_surface_flush(p.surface);
         cairo_destroy(cr);
 
-        s -= 0.00018 * p.frame_time;
-
-        if (s < -0.2)
-            s = 1.2;
+        if (!right_pressed)
+        {
+            s -= 0.00018 * p.frame_time;
+            if (s < -0.2)
+                s = 1.2;
+        }
+        else
+        {
+            s += 0.00018 * p.frame_time;
+            if (s > 1.2)
+                s = -0.2;
+        }
     }
 
     void key_down(key_down_params const& p)
     {
-        if (p.key == SDLK_q)
-            s = 0.8;
+        if (p.key == SDLK_RIGHT)
+            right_pressed = true;
+        else if (p.key == SDLK_q)
+            ctx().quit();
+        else if (p.key == SDLK_f)
+            ctx().toggle_fullscreen();
         else
             sg::model::key_down(p);
     }
 
+    void key_up(key_up_params const& p)
+    {
+        if (p.key == SDLK_RIGHT)
+            right_pressed = false;
+    }
+
 private:
     double s;
+    bool right_pressed;
 };
 
 int main(int argc, char** argv)

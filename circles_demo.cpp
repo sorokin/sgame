@@ -91,6 +91,16 @@ private:
         circles.push_back(c);
     }
 
+    void key_down(key_down_params const& p)
+    {
+        if (p.key == SDLK_q)
+            ctx().quit();
+        else if (p.key == SDLK_f)
+            ctx().toggle_fullscreen();
+        else
+            sg::model::key_down(p);
+    }
+
 private:
     static constexpr float circle_radius = 0.04f;
     float time_till_next_spawn;
