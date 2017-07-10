@@ -30,6 +30,7 @@ struct snake_model : sg::model
     {
         waiting,
         running,
+        paused,
         dead,
     };
 
@@ -139,11 +140,29 @@ struct snake_model : sg::model
         switch (p.key)
         {
         case SDLK_ESCAPE:
+        case SDLK_SPACE:
+            switch (gstate)
+            {
+            case game_state::waiting:
+                break;
+            case game_state::running:
+                gstate = game_state::paused;
+                need_redraw = true;
+                break;
+            case game_state::paused:
+                gstate = game_state::running;
+                need_redraw = true;
+                break;
+            case game_state::dead:
+                reset_snake();
+                break;
+            default:
+                assert(false);
+                break;
+            }
+            break;
         case SDLK_RETURN:
             sg::model::key_down(p);
-            break;
-        case SDLK_SPACE:
-            reset_snake();
             break;
         case SDLK_UP:
         case SDLK_w:
@@ -161,6 +180,26 @@ struct snake_model : sg::model
         case SDLK_d:
             enqueue_action(direction::right);
             break;
+        case SDLK_q:
+            switch (gstate)
+            {
+            case game_state::waiting:
+                ctx().quit();
+                break;
+            case game_state::running:
+                break;
+            case game_state::paused:
+                ctx().quit();
+                break;
+            case game_state::dead:
+                ctx().quit();
+                break;
+            default:
+                assert(false);
+                break;
+            }
+        break;
+
         default:
             break;
         }
@@ -212,7 +251,7 @@ struct snake_model : sg::model
         double ar;
         double ag;
         double ab;
-        if (gstate == game_state::dead)
+        if (gstate == game_state::dead || gstate == game_state::paused)
         {
             r = g = b = 132./255.;
             lrgb = 32./255.;
@@ -257,6 +296,13 @@ struct snake_model : sg::model
             draw_text(cr, "Died!", aspect * 0.5, 0.5);
             cairo_set_font_size(cr, 0.05);
             draw_text(cr, "Press SPACE to restart", aspect * 0.5, 0.56);
+            break;
+        case game_state::paused:
+            cairo_set_source_rgb(cr, 0., 0., 0.);
+            cairo_set_font_size(cr, 0.1);
+            draw_text(cr, "Paused", aspect * 0.5, 0.5);
+            cairo_set_font_size(cr, 0.05);
+            draw_text(cr, "Press SPACE to continue", aspect * 0.5, 0.56);
             break;
         default:
             assert(false);
