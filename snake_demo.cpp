@@ -198,8 +198,10 @@ struct snake_model : sg::model
                 assert(false);
                 break;
             }
-        break;
-
+            break;
+        case SDLK_f:
+            ctx().toggle_fullscreen();
+            break;
         default:
             break;
         }
