@@ -361,6 +361,7 @@ win_params::win_params()
     , height_(480)
     , resizing_policy_(resizing_policy_t::preserve_aspect_ratio)
     , title_("Simple Game Window")
+    , min_frame_interval_(0)
     , model_creation_func_([] (sg::context& ctx) {
         return std::make_unique<sg::model>(ctx);
     })
