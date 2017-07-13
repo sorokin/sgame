@@ -359,7 +359,7 @@ void model::resize(resize_params const&)
 win_params::win_params()
     : width_(640)
     , height_(480)
-    , resizing_policy_(resizing_policy::preserve_aspect_ratio)
+    , resizing_policy_(resizing_policy_t::preserve_aspect_ratio)
     , title_("Simple Game Window")
     , model_creation_func_([] (sg::context& ctx) {
         return std::make_unique<sg::model>(ctx);
@@ -378,7 +378,7 @@ win_params& win_params::height(uint32_t value)
     return *this;
 }
 
-win_params& win_params::resizing_policy(enum resizing_policy value)
+win_params& win_params::resizing_policy(resizing_policy_t value)
 {
     resizing_policy_ = value;
     return *this;
@@ -401,7 +401,7 @@ void sg::run(win_params const& p)
     sdl_initializer sdl_init(SDL_INIT_VIDEO);
     sdl_window sdl_win(p.title_.c_str(), p.width_, p.height_,
         SDL_WINDOW_OPENGL
-      | (p.resizing_policy_ != win_params::resizing_policy::no_resize ? SDL_WINDOW_RESIZABLE : 0));
+      | (p.resizing_policy_ != win_params::resizing_policy_t::no_resize ? SDL_WINDOW_RESIZABLE : 0));
 
     SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 
@@ -533,17 +533,17 @@ void sg::run(win_params const& p)
                     {
                         switch (p.resizing_policy_)
                         {
-                        case win_params::resizing_policy::no_resize:
+                        case win_params::resizing_policy_t::no_resize:
                             assert(false);
                             break;
-                        case win_params::resizing_policy::centered:
+                        case win_params::resizing_policy_t::centered:
                             make_current(sdl_win, context);
                             glViewport(event.window.data1 / 2 - p.width_ / 2,
                                        event.window.data2 / 2 - p.height_ / 2,
                                        p.width_,
                                        p.height_);
                             break;
-                        case win_params::resizing_policy::preserve_aspect_ratio:
+                        case win_params::resizing_policy_t::preserve_aspect_ratio:
                             {
                                 if ((uint64_t)event.window.data1 * p.height_ < (uint64_t)event.window.data2 * p.width_)
                                 {
@@ -563,7 +563,7 @@ void sg::run(win_params const& p)
                                 resize_surface(texture, ctx.tex_width, ctx.tex_height, sdl_win, context, cairo_context, surface, device);
                                 break;
                             }
-                        case win_params::resizing_policy::scaled:
+                        case win_params::resizing_policy_t::scaled:
                             ctx.tex_width = event.window.data1;
                             ctx.tex_height = event.window.data2;
 

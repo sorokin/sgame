@@ -72,7 +72,7 @@ namespace sg
 
     struct win_params
     {
-        enum class resizing_policy
+        enum class resizing_policy_t
         {
             no_resize,
             centered,
@@ -84,7 +84,7 @@ namespace sg
 
         win_params& width(uint32_t value);
         win_params& height(uint32_t value);
-        win_params& resizing_policy(enum resizing_policy value);
+        win_params& resizing_policy(enum resizing_policy_t value);
         win_params& title(std::string title);
 
         win_params& min_frame_interval(uint32_t value);
@@ -107,7 +107,7 @@ namespace sg
     private:
         uint32_t width_;
         uint32_t height_;
-        enum resizing_policy resizing_policy_;
+        resizing_policy_t resizing_policy_;
         std::string title_;
 
         uint32_t min_frame_interval_;
